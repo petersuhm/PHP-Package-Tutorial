@@ -2,6 +2,7 @@ PHP Package Development Like a Boss
 ===================================
 
 * [Building the foundation](#building-the-foundation)
+* [The posts](#the-posts)
 
 ## Building the foundation
 
@@ -104,3 +105,92 @@ If you try and run `phpunit tests/` from the `guru` directory, you will see that
 ```
 
 If you run `phpunit` from the guru directory, you should see a green/passing test. This means that our foundation is working. So far, so good.
+
+## The posts
+
+Our posts will be in the markdown format, including some meta data. We want them to look similar to this:
+
+```
+title: Hello World!
+date: 2014-12-24
+-------
+# Hello World!
+
+This is my **first** post.
+```
+
+_Hint: This is because we will be using Dayle Rees' [Kurenai](https://github.com/daylerees/kurenai) package later on._
+
+Okay, so we need to represent this in a class. We will call it `Post`. Let's do it the TDD way and create a test:
+
+```php
+# packages/guru/tests/PostTest.php
+<?php
+
+use Petersuhm\Guru\Post;
+
+class PostTest extends PHPUnit_Framework_TestCase {
+
+	public function testIsInitializable()
+	{
+		$post = new Post();
+
+		$this->assertInstanceOf('\Petersuhm\Guru\Post', $post);
+	}
+}
+```
+
+This will, of course, fail, since we don't have a `Post` class. I will not go through _all_ my TDD iterations here, so just go ahead and make the file, and see that you get a green test:
+
+```php
+# packages/guru/src/Petersuhm/Guru/Post.php
+<?php namespace Petersuhm\Guru;
+
+class Post {}
+```
+
+Now we need to add some fields to our posts. In addition to the `title`, `date` and `body`, we also need a `slug`, which will be the unique identifier of a post. Again, we start with the test:
+
+```php
+# packages/guru/tests/PostTest.php
+...
+public function testInstantiatesPost()
+{
+	$title = 'First post';
+	$date = '2014-12-24';
+	$slug = 'first-post';
+	$body = '<h1>First post</h1><p>This is my first post.</p>';
+
+	$post = new Post($title, $date, $slug, $body);
+
+	$this->assertEquals($post->title, $title);
+	$this->assertEquals($post->date, $date);
+	$this->assertEquals($post->slug, $slug);
+	$this->assertEquals($post->body, $body);
+}
+```
+
+And to get a nice green passing test, add the fields to the `Post` class:
+
+```php
+# packages/guru/src/Petersuhm/Guru/Post.php
+<?php namespace Petersuhm\Guru;
+
+class Post {
+
+	public $title;
+	public $date;
+	public $slug;
+	public $body;
+
+	public function __construct($title = '', $date = '', $slug = '', $body = '')
+	{
+		$this->title = $title;
+		$this->date = $date;
+		$this->slug = $slug;
+		$this->body = $body;
+	}
+}
+```
+
+Now we have a neat little class to represent our posts. It will come in handy later.

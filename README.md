@@ -10,6 +10,16 @@ PHP Package Development Like a Boss
 	* [Getting all posts](#getting-all-posts)
 	* [Getting a post from a slug](#getting-a-post-from-a-slug)
 
+In this article, we will look into the nuts and bolts of building a PHP package for [Packagist](https://packagist.org/). We will go through all the steps one by one and we will be using a test-driven approach with PHPUnit. PHP has been accused for many things during the times, but the community has really stepped up its game recently. With dependency management tools like Composer, we are able to build packages that can be easily used by others. We will be building a package ourselves, and our package will use and depend on another package. We will build a small utlility for making a flat file CMS. Let's call it "Guru".
+
+I assume that you have a basic knowledge about object-oriented PHP and test-driven development. Otherwise, I encourage you to go through [this guide](http://www.phptherightway.com/). I also assume you have the following things installed and configured:
+
+* A working PHP setup (min. 5.3)
+* [PHPUnit](http://phpunit.de/)
+* [Composer](http://getcomposer.org/)
+
+Let's get started.
+
 ## The Guru package
 
 Guru is the PHP package we will be building for this tutorial. It's a flat file content management system, which basically means that it takes flat text files and turn them into web content. Files, in our case, are in the [markdown](http://daringfireball.net/projects/markdown/) format.

@@ -3,6 +3,11 @@ PHP Package Development Like a Boss
 
 * [Building the foundation](#building-the-foundation)
 * [The posts](#the-posts)
+* [Building the Guru](#building-the-guru)
+	* [What we need](#what-we-need)
+	* [Configuring Guru](#configuring-guru)
+	* [Getting all posts](#getting-all-posts)
+	* [Getting a post from a slug](#getting-a-post-from-a-slug)
 
 ## Building the foundation
 
@@ -51,7 +56,7 @@ The first file we will work on is our `composer.json` file. This file holds impo
 }
 ```
 
-Now run `composer update`. Composer will create a vendor directory and create the necessary files for autoloading.
+Now run `composer install`. Composer will create a vendor directory and create the necessary files for autoloading.
 
 If you use Git for version control, you should make a `.gitignore` file and fill in the following:
 
@@ -194,3 +199,313 @@ class Post {
 ```
 
 Now we have a neat little class to represent our posts. It will come in handy later.
+
+## Building the Guru
+
+In this section we will build our Guru class. We will implement three methods in it: `config()`, `posts()` and `post()`. `posts()` will return all markdown files as `Post` objects and `post()` will return a single `Post` object, when given a post slug.
+
+### What we need
+
+First of all, we need to add some dependencies to our `composer.json` file. We will need [Mockery](https://github.com/padraic/mockery) in our tests, and we will need [Kurenai](https://github.com/daylerees/kurenai) to parse our markdown files. Add the dependencies now, so our file look like this:
+
+```json
+{
+	"name": "petersuhm/guru",
+	"description": "Flat file CMS package for PHP.",
+	"authors": [
+		{
+			"name": "Peter Suhm",
+			"email": "peter@suhm.dk"
+		}
+	],
+	"require": {
+		"php": ">=5.3.0",
+		"daylerees/kurenai": "dev-master"
+	},
+	"require-dev": {
+		"mockery/mockery": "dev-master"
+	},
+	"autoload": {
+		"psr-0": {
+			"Petersuhm\\Guru": "src/"
+		}
+	},
+	"minimum-stability": "dev"
+}
+```
+
+Now, we need to run `composer update`, in order to fetch the new dependencies.
+
+We will also need a couple of fixtures for our tests. We will make two test files: `tests/fixtures/first-post.md` and `tests/fixtures/second-post.md`. They should look like this:
+
+```
+title: First post
+date: 2014-12-24
+-------
+# First post
+```
+```
+title: Second post
+date: 2014-12-25
+-------
+# Second post
+```
+
+This will be useful when we test that our Guru works correctly with the file system.
+
+### Configuring Guru
+
+When using the Guru package, we want to able to do something like this:
+
+```php
+$guru = new \Petersuhm\Guru\Guru();
+$guru->config(array(
+	'content_dir' => '../content',
+	'content_ext' => '.md'
+));
+
+$posts = $guru->posts();
+// or
+$post = $guru->post('some-post');
+```
+
+First things first, we need a `config()` method that can take and array as input. Let´s write the test:
+
+```php
+# packages/guru/tests/GuruTest.php
+...
+public function testConfig()
+{
+	$settings = array('key' => 'value');
+	$guru = new Guru();
+
+	$guru->config($settings);
+
+	$this->assertEquals($guru->settings, $settings);
+}
+```
+
+Next step is to get a green test, so let´s implement the necessary code:
+
+```php
+# packages/guru/src/Petersuhm/Guru/Guru.php
+...
+public $settings = array();
+
+public function config($settings)
+{
+	$this->settings = array_merge($this->settings, $settings);
+}
+```
+
+And it's green.
+
+### Getting all posts
+
+Okay, things are about to get serious. Can you feel it?
+
+Let's start by looking at the constructor. In order to ensure that our class is testable, we will inject our dependencies through the constructor. We need two things: a `\Kurenai\DocumentParser` instance and a post resolver. The post resolver will be used to resolve every `Post` object we might need. We will implement this using a [closure](http://php.net/closures). This is how the constuctor should look:
+
+```php
+# packages/guru/src/Petersuhm/Guru/Guru.php
+...
+use Kurenai\DocumentParser;
+
+public function __construct(DocumentParser $parser = null, $postResolver = null)
+{
+	if ($parser === null)
+		$this->parser = new DocumentParser;
+	else
+		$this->parser = $parser;
+
+	if ($postResolver === null)
+		$this->postResolver = function() { return new Post; };
+	else
+		$this->postResolver = $postResolver;
+}
+```
+
+This way, we are able to inject mocks and stubs into our class, should it be necessary.
+
+Speaking of which. Let's look at some testing. Since we will be using Mockery, we need to change our `GuruTest` a tiny bit. We also need to setup the dependencies that we will inject into the `Guru` class. For the `DocumentParser`, we will use a mock, so we can set expectations, and for the post resolver, we will instantiate an object from a simple `PostStub` class that we will declare. We need to add the following code to our test:
+
+```php
+# packages/guru/tests/GuruTest.php
+...
+use Petersuhm\Guru\Guru;
+use Petersuhm\Guru\Post;
+use Mockery as m;
+
+class GuruTest extends PHPUnit_Framework_TestCase {
+
+	public function tearDown()
+	{
+		m::close();
+	}
+
+	public function setUp()
+	{
+		$this->parser = m::mock('\Kurenai\DocumentParser');
+		$this->postResolver = function () { return new PostStub(); };
+	}
+
+	public function testIsInitializable()
+...
+class PostStub {}
+```
+
+Now, we are ready to write the test for our `posts()` method. Here is what we will be doing: First, we will fetch the two post fixtures that we already made. We also instantiates two `PostStub` objects, that we will compare to the ones returned by `posts()` (remember that the post resolver for our tests will make a new `PostStub` instance). Next, we loop over the files, which serves two purposes. First we setup our two `PostStub` instances, and second we make sure that our `DocumentParser`'s `parse()` method is called with the content of the two files, and returns a mocked instance of the `Document` class. We also set some expectations for the mocked `Document`s that matches the values of the `PostStub` instances. Finally, we instantiate the `Guru` class and test that the `posts()` method is in fact returning the two posts and that they matches the stubs. The test should look like this:
+
+```php
+# packages/guru/tests/GuruTest.php
+...
+public function testPosts()
+{
+	$directory = __DIR__ . '/fixtures';
+	$files = array(
+		$directory . '/first-post.md',
+		$directory . '/second-post.md'
+	);
+	$posts = array(new PostStub, new PostStub);
+
+	for ($i = 0; $i < 2; $i++)
+	{
+		$posts[$i]->title = 'A title';
+		$posts[$i]->date = '2014-12-24';
+		$posts[$i]->slug = basename($files[$i], '.md');
+		$posts[$i]->body = '<h1>Some content</h1>';
+
+		$document = m::mock('\Kurenai\Document');
+		$document->shouldReceive('get')->with('title')->andReturn('A title');
+		$document->shouldReceive('get')->with('date')->andReturn('2014-12-24');
+		$document->shouldReceive('getHtmlContent')->andReturn('<h1>Some content</h1>');
+
+		$source = file_get_contents($files[$i]);
+		$this->parser->shouldReceive('parse')->with($source)->andReturn($document);
+	}
+
+	$guru = new Guru($this->parser, $this->postResolver);
+	$guru->config(array(
+		'content_dir' => $directory,
+		'content_ext' => '.md'
+	));
+
+	$this->assertEquals($guru->posts(), array($posts[0], $posts[1]));
+}
+```
+
+In order to get a passing test, we need to actually implement the `posts()` method. We will use the built-in [glob](http://php.net/glob) function, to scan the content directory for markdown files. For each file, we will run the content through the parser and turn it into a `Post` object. Finally, we will return all the posts in an array:
+
+```php
+# packages/guru/src/Petersuhm/Guru/Guru.php
+...
+public function posts()
+{
+	$posts = array();
+
+	$pattern = $this->settings['content_dir'] . '/*' . $this->settings['content_ext'];
+	$files = glob($pattern);
+
+	foreach ($files as $file)
+	{
+		$slug = basename($file, '.md');
+		$source = file_get_contents($file);
+		$document = $this->parser->parse($source);
+
+		$post = call_user_func($this->postResolver);
+		$post->title = $document->get('title');
+		$post->date = $document->get('date');
+		$post->slug = $slug;
+		$post->body = $document->getHtmlContent();
+
+		array_push($posts, $post);
+	}
+
+	return $posts;
+}
+```
+
+Our Guru is taking shape.
+
+### Getting a post from a slug
+
+We also need to be able to get a single post from the Guru. We will do this by calling a `post()` method with a post slug. We start with the test, which is basically the same as the one for `posts()`, just without the loop:
+
+```php
+# packages/guru/tests/GuruTest.php
+...
+public function testPost()
+{
+	$directory = __DIR__ . '/fixtures';
+	$file = $directory . '/second-post.md';
+
+	$post = new PostStub();
+	$post->title = 'A title';
+	$post->date = '2014-12-24';
+	$post->slug = 'second-post';
+	$post->body = '<h1>Some content</h1>';
+
+	$document = m::mock('\Kurenai\Document');
+	$document->shouldReceive('get')->with('title')->andReturn('A title');
+	$document->shouldReceive('get')->with('date')->andReturn('2014-12-24');
+	$document->shouldReceive('getHtmlContent')->andReturn('<h1>Some content</h1>');
+
+	$source = file_get_contents($file);
+	$this->parser->shouldReceive('parse')->with($source)->andReturn($document);
+
+	$guru = new Guru($this->parser, $this->postResolver);
+	$guru->config(array(
+		'content_dir' => $directory,
+		'content_ext' => '.md'
+	));
+
+	$this->assertEquals($guru->post('second-post'), $post);
+}
+```
+
+The implementation looks similar to `posts()`, but this time we need to fetch the filename from the slug:
+
+```php
+# packages/guru/src/Petersuhm/Guru/Guru.php
+...
+public function post($slug)
+{
+	$file = $this->settings['content_dir'] . '/' . $slug . $this->settings['content_ext'];
+	$source = file_get_contents($file);
+	$document = $this->parser->parse($source);
+
+	$post = call_user_func($this->postResolver);
+	$post->title = $document->get('title');
+	$post->date = $document->get('date');
+	$post->slug = $slug;
+	$post->body = $document->getHtmlContent();
+
+	return $post;
+}
+```
+
+That's it. We now have a working Guru. At the moment though, it doesn't care much about security or error handling, but (for now) that is out of the scope of this tutorial.
+
+So far, we didn't test our Guru outside of the testing environment. If we want to see that it actually works, we can do something like this in the `index.php` file:
+
+```php
+# public/index.php
+<?php
+
+require "../packages/guru/vendor/autoload.php";
+
+$guru = new \Petersuhm\Guru\Guru();
+$guru->config(array(
+	'content_dir' => '../content',
+	'content_ext' => '.md'
+));
+
+$posts = $guru->posts();
+
+foreach ($posts as $post)
+{
+	var_dump($guru->post($post->slug));
+}
+```
+
+Normally, we don't need to require the autoload file for a package, but since we aren´t using Composer in the root project, we need to require it manually. If we fetched the package from Packagist, Composer would take care of this. In order to see anything, you need to make a `content` directory and put some markdown files in it. You can reuse the ones you made for testing in `packages/guru/tests/fixtures`.

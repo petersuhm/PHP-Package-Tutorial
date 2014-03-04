@@ -1,6 +1,7 @@
 PHP Package Development Like a Boss
 ===================================
 
+* [The Guru package](#the-guru-package)
 * [Building the foundation](#building-the-foundation)
 * [The posts](#the-posts)
 * [Building the Guru](#building-the-guru)
@@ -8,6 +9,12 @@ PHP Package Development Like a Boss
 	* [Configuring Guru](#configuring-guru)
 	* [Getting all posts](#getting-all-posts)
 	* [Getting a post from a slug](#getting-a-post-from-a-slug)
+
+## The Guru package
+
+Guru is the PHP package we will be building for this tutorial. It's a flat file content management system, which basically means that it takes flat text files and turn them into web content. Files, in our case, are in the [markdown](http://daringfireball.net/projects/markdown/) format.
+
+You could use Guru together with an awesome PHP framework, such as [Laravel](http://laravel.com/) or [Slim](http://slimframework.com/), in order to build a blog. (Actually, you shouldn't do this, since the code here is only meant as an example. It's not yet ready for production, but please do play along here!)
 
 ## Building the foundation
 

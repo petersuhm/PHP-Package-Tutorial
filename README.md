@@ -1,6 +1,7 @@
 PHP Package Development Like a Boss
 ===================================
 
+* [What's a package?](#whats-a-package)
 * [The Guru package](#the-guru-package)
 * [Building the foundation](#building-the-foundation)
 * [The posts](#the-posts)
@@ -19,6 +20,12 @@ I assume that you have a basic knowledge about object-oriented PHP and test-driv
 * [Composer](http://getcomposer.org/)
 
 Let's get started.
+
+## What's a package?
+
+A package is a collection of PHP code that is packed together in a way that it can easily be used for other projects. It's a great idea to split up a complex application into smaller, more manageable chunks. If you include a `composer.json` file in your package, you are able to put in on Packagist and have other people use it. Composer is a dependency management tool for PHP applications. If you don't know it, should read about it [here](https://getcomposer.org/doc/). Packagist is an online repository for Composer packages. You can read more about it [here](https://packagist.org/about).
+
+Packages are great, since you can build whole web applications just by putting together other people's packages in your own way. You can also do your own open source contributions, by publishing parts of your own applications as packages, and have the community help you improve it. Win-win.
 
 ## The Guru package
 

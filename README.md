@@ -539,7 +539,7 @@ Normally, we don't need to require the autoload file for a package, but since we
 
 # Going public
 
-At this point, we are ready to release the first version of our Guru. We will put in on [Packagist](https://packagist.org/about), so others can use it.
+At this point, we are ready to release the first version of our Guru. We will put in on [Packagist](https://packagist.org), so others can use it.
 
 ## Tagging releases
 

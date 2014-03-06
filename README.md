@@ -13,6 +13,7 @@ PHP Package Development Like a Boss
 * [Going public](#going-public)
 	* [Tagging releases](#tagging-releases)
 	* [Publishing on Packagist](#publishing-on-packagist)
+* [Wrapping it up](#wrapping-it-up)
 
 In this article, we will look into the nuts and bolts of building a PHP package for [Packagist](https://packagist.org/). We will go through all the steps one by one and we will be using a test-driven approach with PHPUnit. PHP has been accused for many things during the times, but the community has really stepped up its game recently. With dependency management tools like Composer, we are able to build packages that can be easily used by others. We will be building a package ourselves, and our package will use and depend on another package. We will build a small utlility for making a flat file CMS. Let's call it "Guru".
 
@@ -555,3 +556,11 @@ You can do this on Github as well, if you prefer to use their interface. Easy, r
 ## Publishing on Packagist
 
 Publishing a package on Packagist is super easy. Basically, all you have to do is to have the `composer.json` file present in your package's root directory (which we already have) and to put your package in a version control repository (like [Github](https://github.com/) or [BitBucket](https://bitbucket.org/)). When this is done, you can submit it on Packagist. I will not go trough the details here, but your can read more on their [website](https://packagist.org/about).
+
+# Wrapping it up
+
+It's a great feeling. Our package is finally on Packagist - ready for others to incorporate in their projects, but this is not the end. From now on, we have to keep making Guru better. We might get pull requests on Github, from people who wants to help us improve the code. In our case, we should probably work on security and error handling, before we release next time. We should probably also include a file describing the license of our package. How about [MIT](http://opensource.org/licenses/MIT).
+
+Great open source projects, released trough Composer and Packagist, are leading a new era of modern PHP development. If you want to share parts of your code, it has never been easier. Thinking about putting your code in packages, even if you don't open source them and publish them, is a great way to design better applications. By structuring your code into more manageable chunks, your applications will become less complex and easier to maintain. It will also be easier for you to reuse your code in other projects. So go ahead. Make an awesome package and publish it for the World to use it!
+
+&copy; 2014 Copyright Peter Suhm

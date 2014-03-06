@@ -538,11 +538,11 @@ foreach ($posts as $post)
 
 Normally, we don't need to require the autoload file for a package, but since we aren´t using Composer in the root project, we need to require it manually. If we fetched the package from Packagist, Composer would take care of this. In order to see anything, you need to make a `content` directory and put some markdown files in it. You can reuse the ones you made for testing in `packages/guru/tests/fixtures`.
 
-# Going public
+## Going public
 
 At this point, we are ready to release the first version of our Guru. We will put in on [Packagist](https://packagist.org), so others can use it.
 
-## Tagging releases
+### Tagging releases
 
 Before we go public, we should make a formal release, so people know which version of Guru they are using. We will do this with [Git tagging](http://git-scm.com/book/en/Git-Basics-Tagging), which works perfectly with both Github and Packagist. So in this section, I assume you use Git. Otherwise, you have to figure out how to do this somewhere else. Let's tag our first release. We will call this version `v0.0.1-alpha`, since it is not really stable or ready for production (yet). With Git, this is easy:
 
@@ -553,11 +553,11 @@ $ git push --tags
 
 You can do this on Github as well, if you prefer to use their interface. Easy, right?
 
-## Publishing on Packagist
+### Publishing on Packagist
 
 Publishing a package on Packagist is super easy. Basically, all you have to do is to have the `composer.json` file present in your package's root directory (which we already have) and to put your package in a version control repository (like [Github](https://github.com/) or [BitBucket](https://bitbucket.org/)). When this is done, you can submit it on Packagist. I will not go trough the details here, but your can read more on their [website](https://packagist.org/about).
 
-# Wrapping it up
+## Wrapping it up
 
 It's a great feeling. Our package is finally on Packagist - ready for others to incorporate in their projects, but this is not the end. From now on, we have to keep making Guru better. Maybe we will get pull requests on Github from people who wants to help us improve the code. In our case, we should probably work on security and error handling, before we release next time. We should probably also include a file describing the license of our package. How about [MIT](http://opensource.org/licenses/MIT).
 

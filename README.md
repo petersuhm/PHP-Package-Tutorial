@@ -15,9 +15,9 @@ PHP Package Development Like a Boss
 	* [Publishing on Packagist](#publishing-on-packagist)
 * [Wrapping it up](#wrapping-it-up)
 
-In this article, we will look into the nuts and bolts of building a PHP package for [Packagist](https://packagist.org/). We will go through all the steps one by one and we will be using a test-driven approach with PHPUnit. PHP has been accused for many things during the times, but the community has really stepped up its game recently. With dependency management tools like Composer, we are able to build packages that can be easily used by others. We will be building a package ourselves, and our package will use and depend on another package. We will build a small utlility for making a flat file CMS. Let's call it "Guru".
+In this article, we will look into the nuts and bolts of building a PHP package for [Packagist](https://packagist.org/). We will go through all the steps one by one and we will be using a test-driven approach with PHPUnit. PHP has been accused for many things during the years, but the community has really stepped up its game recently. With dependency management tools like Composer, we are able to build packages that can be easily used by others. We will be building a package ourselves, and our package will use and depend on other packages. We will build a small utlility for making a flat file CMS. Let's call it "Guru".
 
-I assume that you have a basic knowledge about object-oriented PHP and test-driven development. Otherwise, I encourage you to go through [this guide](http://www.phptherightway.com/). I also assume you have the following things installed and configured:
+I assume that you have basic knowledge about object-oriented PHP and test-driven development. Otherwise, I encourage you to go through [this guide](http://www.phptherightway.com/). I also assume that you have the following things installed and configured:
 
 * A working PHP setup (min. 5.3)
 * [PHPUnit](http://phpunit.de/)
@@ -27,7 +27,7 @@ Let's get started.
 
 ## What's a package?
 
-A package is a collection of PHP code that is packed together in a way that it can easily be used for other projects. It's a great idea to split up a complex application into smaller, more manageable chunks. If you include a `composer.json` file in your package, you are able to put in on Packagist and have other people use it. Composer is a dependency management tool for PHP applications. If you don't know it, should read about it [here](https://getcomposer.org/doc/). Packagist is an online repository for Composer packages. You can read more about it [here](https://packagist.org/about).
+A package is a collection of PHP code that is packed together in a way so that it can be easily used for other projects. It's a great idea to split up a complex application into smaller, more manageable chunks. If you include a `composer.json` file in your package, you are able to put in on Packagist and have other people use it. Composer is a dependency management tool for PHP applications. If you don't know it, should read about it [here](https://getcomposer.org/doc/). Packagist is an online repository for Composer packages. You can read more about it [here](https://packagist.org/about).
 
 Packages are great, since you can build whole web applications just by putting together other people's packages in your own way. You can also do your own open source contributions, by publishing parts of your own applications as packages, and have the community help you improve it. Win-win.
 
@@ -60,7 +60,7 @@ Go ahead and create the following files and directories:
 
 ```
 
-The first file we will work on is our `composer.json` file. This file holds important information about our package and its (upcoming) dependencies. It should look like this:
+The first file we will work on is our `composer.json` file. This file holds important information about our package and its (upcoming) dependencies. It should look something like this:
 
 ```json
 {
@@ -84,7 +84,7 @@ The first file we will work on is our `composer.json` file. This file holds impo
 }
 ```
 
-Now run `composer install`. Composer will create a vendor directory and create the necessary files for autoloading.
+Now run `composer install`, and Composer will create a vendor directory and the necessary files for autoloading.
 
 If you use Git for version control, you should make a `.gitignore` file and fill in the following:
 
@@ -103,7 +103,7 @@ Next file is `Guru.php`, which contains our `Guru` class. This class will be the
 class Guru {}
 ```
 
-Since we will be usen a test-driven approach, obviously we need a test for every class we make. So go ahead and fill in the first test for our `Guru` class:
+Since we will be usen a test-driven approach, obviously we need a test for every class we make. So go ahead, and fill in the first test for our `Guru` class:
 
 ```php
 # packages/guru/tests/GuruTest.php
@@ -130,7 +130,7 @@ If you try and run `phpunit tests/` from the `guru` directory, you will see that
          bootstrap="./vendor/autoload.php"
 >
     <testsuites>
-        <testsuite name="Flat Test Suite">
+        <testsuite name="Guru Test Suite">
             <directory suffix=".php">./tests/</directory>
         </testsuite>
     </testsuites>
@@ -230,7 +230,7 @@ Now we have a neat little class to represent our posts. It will come in handy la
 
 ## Building the Guru
 
-In this section we will build our Guru class. We will implement three methods in it: `config()`, `posts()` and `post()`. `posts()` will return all markdown files as `Post` objects and `post()` will return a single `Post` object, when given a post slug.
+In this section, we will build our Guru class. We will implement three methods in it: `config()`, `posts()` and `post()`. `posts()` will return all markdown files as `Post` objects and `post()` will return a single `Post` object, when given a post slug.
 
 ### What we need
 
@@ -355,7 +355,7 @@ public function __construct(DocumentParser $parser = null, $postResolver = null)
 
 This way, we are able to inject mocks and stubs into our class, should it be necessary.
 
-Speaking of which. Let's look at some testing. Since we will be using Mockery, we need to change our `GuruTest` a tiny bit. We also need to setup the dependencies that we will inject into the `Guru` class. For the `DocumentParser`, we will use a mock, so we can set expectations, and for the post resolver, we will instantiate an object from a simple `PostStub` class that we will declare. We need to add the following code to our test:
+Speaking of which. Let's look at some testing. Since we will be using Mockery, we need to change our `GuruTest` a tiny bit. We also need to setup the dependencies that we will inject into the `Guru` class. For the `DocumentParser`, we will use a mock, so that we can set expectations, and for the post resolver, we will instantiate an object from a simple `PostStub` class that we will declare. We need to add the following code to our test:
 
 ```php
 # packages/guru/tests/GuruTest.php
@@ -382,7 +382,7 @@ class GuruTest extends PHPUnit_Framework_TestCase {
 class PostStub {}
 ```
 
-Now, we are ready to write the test for our `posts()` method. Here is what we will be doing: First, we will fetch the two post fixtures that we already made. We also instantiates two `PostStub` objects, that we will compare to the ones returned by `posts()` (remember that the post resolver for our tests will make a new `PostStub` instance). Next, we loop over the files, which serves two purposes. First we setup our two `PostStub` instances, and second we make sure that our `DocumentParser`'s `parse()` method is called with the content of the two files, and returns a mocked instance of the `Document` class. We also set some expectations for the mocked `Document`s that matches the values of the `PostStub` instances. Finally, we instantiate the `Guru` class and test that the `posts()` method is in fact returning the two posts and that they matches the stubs. The test should look like this:
+Now, we are ready to write the test for our `posts()` method. Here is what we will be doing: First, we will fetch the two post fixtures that we already made. We also instantiates two `PostStub` objects, which we will compare to the ones returned by `posts()` (remember that the post resolver for our tests will make a new `PostStub` instance). Next, we loop over the files, which serves two purposes. First we setup our two `PostStub` instances, and second we make sure that our `DocumentParser`'s `parse()` method is called with the content of the two files and returns a mocked instance of the `Document` class. We also set some expectations for the mocked `Document`s that matches the values of the `PostStub` instances. Finally, we instantiate the `Guru` class and test that the `posts()` method is in fact returning the two posts and that they matches the stubs. The test should look like this:
 
 ```php
 # packages/guru/tests/GuruTest.php
@@ -559,7 +559,7 @@ Publishing a package on Packagist is super easy. Basically, all you have to do i
 
 # Wrapping it up
 
-It's a great feeling. Our package is finally on Packagist - ready for others to incorporate in their projects, but this is not the end. From now on, we have to keep making Guru better. We might get pull requests on Github, from people who wants to help us improve the code. In our case, we should probably work on security and error handling, before we release next time. We should probably also include a file describing the license of our package. How about [MIT](http://opensource.org/licenses/MIT).
+It's a great feeling. Our package is finally on Packagist - ready for others to incorporate in their projects, but this is not the end. From now on, we have to keep making Guru better. Maybe we will get pull requests on Github from people who wants to help us improve the code. In our case, we should probably work on security and error handling, before we release next time. We should probably also include a file describing the license of our package. How about [MIT](http://opensource.org/licenses/MIT).
 
 Great open source projects, released trough Composer and Packagist, are leading a new era of modern PHP development. If you want to share parts of your code, it has never been easier. Thinking about putting your code in packages, even if you don't open source them and publish them, is a great way to design better applications. By structuring your code into more manageable chunks, your applications will become less complex and easier to maintain. It will also be easier for you to reuse your code in other projects. So go ahead. Make an awesome package and publish it for the World to use it!
 
